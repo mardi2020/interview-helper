@@ -22,7 +22,7 @@ This is a chatbot that helps you prepare for technical interviews using document
 - Create and activate a virtual environment
   ```
   python3 -m venv .venv
-  source venv/bin/activate
+  source .venv/bin/activate
   ```
 - Install the necessary Python packages listed in `requirements.txt`
   ```
