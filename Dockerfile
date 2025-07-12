@@ -27,8 +27,6 @@ COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /app /app
 
-COPY .env .env
-
 EXPOSE 8501
 
 CMD ["streamlit", "run", "main.py"]
