@@ -1,4 +1,5 @@
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
+
 import os
 
 from config.parameters import DB_PATH, get_embeddings
