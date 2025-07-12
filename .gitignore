@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# macOS metadata
+.DS_Store
+
+# Streamlit
+.streamlit/config.toml
+.streamlit/secrets.toml
+
+# FAISS vector store
+vectorstore/
+!vectorstore/.gitkeep  # 폴더 유지하고 싶다면
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Uploaded temp files (pdf/text) during parsing
+*.pdf
+*.txt
+*.md
+
+# dotenv
+.env
+
+# PyCharm
+.idea/
+
+# OS generated
+Thumbs.db
+ehthumbs.db
