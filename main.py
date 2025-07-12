@@ -1,5 +1,7 @@
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.memory import ConversationBufferMemory
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from prompt.feedback import get_feedback
 from prompt.summary import get_summary_prompt
@@ -22,10 +24,11 @@ def init_session():
     st.session_state.answers = []
     st.session_state.feedbacks = []
 
-    st.session_state.memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True,
-    )
+    # st.session_state.memory = ConversationBufferMemory(
+    #     memory_key="chat_history",
+    #     return_messages=True,
+    # )
+    st.session_state.memory = ChatMessageHistory()
 
 
 def render_ui(page_title="나의 면접관"):
@@ -66,12 +69,12 @@ def render_ui(page_title="나의 면접관"):
 
     # 질문 생성 단계
     elif st.session_state.stage == "ask":
-        history = st.session_state.messages
+        history = st.session_state.memory
         question_prompt = generate_question_with_rag(st.session_state.selected_topics, history)
-        question = llm.invoke(question_prompt).content
-
-        st.session_state.questions.append(question)
-        st.session_state.messages.append(AIMessage(content=question))
+        
+        print("=====",history)
+        st.session_state.questions.append(question_prompt)
+        st.session_state.messages.append(AIMessage(content=question_prompt))
         st.session_state.stage = "wait_answer"
         st.rerun()
 
@@ -86,9 +89,10 @@ def render_ui(page_title="나의 면접관"):
     if st.session_state.stage == "wait_answer":
         user_input = st.chat_input("질문에 답변해보세요.", key="user_input")
         if user_input:
+            history = st.session_state.memory
             st.session_state.answers.append(user_input)
             st.session_state.messages.append(HumanMessage(content=user_input))
-            feedback = get_feedback(user_input)
+            feedback = get_feedback(user_input, history)
             st.session_state.feedbacks.append(feedback)
             st.session_state.messages.append(AIMessage(content=feedback))
             st.session_state.stage = "confirm_next"
