@@ -1,18 +1,53 @@
+"""
+Streamlit-based chatbot UI module for an interview helper application.
+
+This module manages the user interface flow, session state, and interaction
+with the interview workflow graph and language models. It supports document
+upload for retrieval-augmented generation (RAG), technical topic selection,
+question generation, user answer input, feedback delivery, and session summary.
+
+Key features:
+- Session state initialization and management
+- Document upload and vector store update
+- Dynamic multi-stage interview interaction via workflow graph
+- User-friendly UI with Streamlit chat components
+"""
+
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_community.chat_message_histories import ChatMessageHistory
+
+import streamlit as st
 
 from config.parameters import get_llm
 from rag.loader import load_and_split_file
 from rag.vector_store import save_to_faiss
-
-import streamlit as st
 
 from workflow.graph import create_graph
 
 llm = get_llm()
 graph = create_graph()
 
+
 def init_session():
+    """
+    Initialize or reset all Streamlit session state variables for a new chatbot session.
+
+    This includes clearing previous messages, questions, answers, feedbacks,
+    and resetting the workflow stage to "select_topic". Also initializes
+    a ChatMessageHistory object for conversation memory and a dictionary
+    to keep track of workflow graph state.
+
+    The session_state variables initialized:
+    - stage: current UI stage of the chatbot
+    - uploaded_file_name: filename of the uploaded document (if any)
+    - selected_topics: list of technical topics selected by the user
+    - messages: list of chat messages (HumanMessage and AIMessage objects)
+    - questions: list of generated interview questions
+    - answers: list of user-provided answers
+    - feedbacks: list of feedback messages from the chatbot
+    - memory: ChatMessageHistory instance for conversational context
+    - graph_state: dict containing state used by the workflow graph engine
+    """
     st.session_state.stage = "select_topic"
     st.session_state.uploaded_file_name = None
     st.session_state.selected_topics = []
@@ -21,12 +56,7 @@ def init_session():
     st.session_state.answers = []
     st.session_state.feedbacks = []
 
-    # st.session_state.memory = ConversationBufferMemory(
-    #     memory_key="chat_history",
-    #     return_messages=True,
-    # )
     st.session_state.memory = ChatMessageHistory()
-    
     st.session_state.graph_state = {
         "messages": [],
         "tech_keywords": "",
@@ -36,6 +66,29 @@ def init_session():
 
 
 def render_ui(page_title="나의 면접관"):
+    """
+    Render the full Streamlit user interface for the interview chatbot.
+
+    This function manages the UI flow by rendering components according to the
+    current session stage. It handles:
+    - Page setup and title
+    - Session initialization if needed
+    - Sidebar document upload and vector database update
+    - User input for selecting technical topics
+    - Interview question generation and display
+    - User answer input and feedback generation
+    - User prompt to continue or end the interview
+    - Summary generation and display at session end
+
+    Args:
+        page_title (str): Title displayed on the Streamlit app page.
+
+    Notes:
+        This function uses the workflow graph to invoke different agents for
+        question generation, feedback, and summarization based on the current state.
+        It relies on Streamlit's rerun mechanism to refresh UI and state transitions.
+    """
+    
     st.set_page_config(page_title=page_title)
     st.title(page_title)
 
@@ -74,8 +127,6 @@ def render_ui(page_title="나의 면접관"):
 
     # 질문 생성 단계
     elif st.session_state.stage == "ask":
-        history = st.session_state.memory
-        # question_prompt = generate_question_with_rag(st.session_state.selected_topics, history)
         question_prompt = graph.invoke(st.session_state.graph_state, interrupt_after="ask")
         question = question_prompt["messages"][-1]["content"]
         st.session_state.questions.append(question)
@@ -98,7 +149,6 @@ def render_ui(page_title="나의 면접관"):
             st.session_state.answers.append(user_input)
             st.session_state.messages.append(HumanMessage(content=user_input))
             st.session_state.graph_state["user_input"] = user_input
-            # feedback = get_feedback(user_input, history)
             response = graph.invoke(st.session_state.graph_state, interrupt_after="feedback")
             feedback = response['messages'][-1]['content']
             st.session_state.feedbacks.append(feedback)

@@ -1,16 +1,33 @@
-from config.parameters import get_llm
-from rag.vector_store import load_faiss
-from workflow.state import CurrentStep, InterviewState
+"""
+Interview agents module: defines functions for asking questions, giving feedback,
+and summarizing interview sessions using LLM and vector search.
+"""
+
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts import PromptTemplate
 
+from .state import InterviewState
+from config.parameters import get_llm
+from rag.vector_store import load_faiss
+
+
 def ask_agent(state: InterviewState) -> InterviewState:
+    """
+    Generate a technical interview question based on resume and conversation.
+
+    Args:
+        state (InterviewState): Current interview state including messages and keywords.
+
+    Returns:
+        InterviewState: Updated interview state with a new question added.
+    """
+
     system_prompt = """
     당신은 전문적인 기술 면접관입니다.
     뛰어난 인재를 선발하기 위해 이력서 기반으로 날카로운 질문을 합니다.
     """
-    
+
     messages = [SystemMessage(content=system_prompt)]
         # state에서 메시지 가져오기
     for message in state["messages"]:
@@ -32,23 +49,32 @@ def ask_agent(state: InterviewState) -> InterviewState:
 
     prompt = f"""
     아래 이력 기반 정보와 대화 맥락을 참고해,  
-    다음 기술({", ".join(state["tech_keywords"])}) 관련 면접 질문을 하나만,  
+    다음 기술({", ".join(state["tech_keywords"])}) 관련 면접 질문을 하나만,
     질문만, 설명 없이, 한 문장으로 생성하세요.
         
     이력 정보:  
     {context_text}
     """
-    
+
     messages.append(HumanMessage(content=prompt))
-    
+
     response = get_llm().invoke(messages)
-    
+
     new_state = state.copy()
-    
     new_state["messages"].append({"role": "interviewer", "content": response.content})
     return new_state
 
 def feedback_agent(state: InterviewState) -> InterviewState:
+    """
+    Provide feedback on candidate's answers using few-shot prompting.
+
+    Args:
+        state (InterviewState): Current interview state including user input and message history.
+
+    Returns:
+        InterviewState: Updated interview state with feedback added.
+    """
+
     system_prompt = """
     당신은 전문적인 기술 면접관이자 강사사입니다.
     취업준비생들에게 조언을 해주기 위해 질문/답변들을 토대로 조언을 해줍니다.
@@ -62,7 +88,7 @@ def feedback_agent(state: InterviewState) -> InterviewState:
             messages.append(
                 HumanMessage(content=f"{message['role']}: {message['content']}")
             )
-            
+
     examples = [
         {
             "answer": "FastAPI에서 async/await을 사용해 LLM 호출을 병렬 처리했습니다.",
@@ -86,23 +112,33 @@ def feedback_agent(state: InterviewState) -> InterviewState:
         suffix="지원자: {user_answer}\n피드백:",
         input_variables=["user_answer"],
     )
-    
-    
+
     messages.append(HumanMessage(content=fewshot_prompt.invoke({"user_answer": state["user_input"]}).to_string()))
     response = get_llm().invoke(messages)
-    
+
     new_state = state.copy()
     new_state["messages"].append({"role": "applicant", "content": state["user_input"]})
     new_state["messages"].append({"role": "feedback", "content": response.content})
     return new_state
-    
+
+
 def summary_agent(state: InterviewState) -> InterviewState:
+    """
+    Summarize technical weaknesses and improvements from the session.
+
+    Args:
+        state (InterviewState): Current interview state including message history.
+
+    Returns:
+        InterviewState: Updated interview state with summary added.
+    """
+
     system_prompt = """
     당신은 전문적인 기술 면접관입니다.
     """
-    
+
     messages = [SystemMessage(content=system_prompt)]
-    # state에서 메시지 가져오기
+
     for message in state["messages"]:
         if message["role"] == "assistant":
             messages.append(AIMessage(content=message["content"]))
@@ -110,8 +146,8 @@ def summary_agent(state: InterviewState) -> InterviewState:
             messages.append(
                 HumanMessage(content=f"{message['role']}: {message['content']}")
             )
-    
-    prompt = f"""
+
+    prompt = """
         위의 내용은 사용자 질문/답변/피드백의 기록입니다. 이 데이터를 바탕으로 사용자의 기술적 약점과 개선점을 요약해주세요.
 
         요약:
@@ -121,6 +157,6 @@ def summary_agent(state: InterviewState) -> InterviewState:
     )
     response = get_llm().invoke(messages)
     new_state = state.copy()
-    
+
     new_state["messages"].append({"role": "summarier", "content": response.content})
     return new_state

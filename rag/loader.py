@@ -1,3 +1,8 @@
+"""
+Module for loading and splitting uploaded text or PDF files into smaller chunks
+using LangChain document loaders and text splitter.
+"""
+
 from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import tempfile
