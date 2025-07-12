@@ -42,13 +42,10 @@ This is a chatbot that helps you prepare for technical interviews using document
   ```
   docker run --rm -p 8501:8501 --env-file .env interview-helper:latest
   ```
-
-Please access the app by visiting http://localhost:8501 in your browser.
-
-You can use the Docker image via GitHub Packages at:
-https://github.com/mardi2020/interview-helper/pkgs/container/interview-helper
-
+You can use the Docker image via GitHub Packages at [packages](https://github.com/mardi2020/interview-helper/pkgs/container/interview-helper)
 - Please pull the image and use it as follows
   ```
   docker pull ghcr.io/mardi2020/interview-helper:<tag>
   ```
+  
+Please access the app by visiting http://localhost:8501 in your browser.
