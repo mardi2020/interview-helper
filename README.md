@@ -19,6 +19,11 @@ This is a chatbot that helps you prepare for technical interviews using document
   ```
 
 #### For local use
+- Create and activate a virtual environment
+  ```
+  python3 -m venv .venv
+  source venv/bin/activate
+  ```
 - Install the necessary Python packages listed in `requirements.txt`
   ```
   pip install -r requirements.txt
