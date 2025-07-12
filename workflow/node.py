@@ -3,6 +3,7 @@ Interview agents module: defines functions for asking questions, giving feedback
 and summarizing interview sessions using LLM and vector search.
 """
 
+from langchain.agents import load_tools, initialize_agent, AgentType
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts import PromptTemplate
@@ -50,21 +51,30 @@ def ask_agent(state: InterviewState) -> InterviewState:
 
 
     prompt = f"""
-    아래 이력 기반 정보와 대화 맥락을 참고해,  
-    다음 기술({", ".join(state["tech_keywords"])}) 관련 면접 질문을 하나만,
-    질문만, 설명 없이, 한 문장으로 생성하세요.
+    아래 이력 정보를 참고해,  
+    다음 기술({", ".join(state["tech_keywords"])}) 관련 정보를 알아보세요.
+    그 후 이력 정보와 연결하여 관련 면접 질문을 설명없이 한글로, 한 문장으로 생성하세요.
+    과거에 질문했던 질문은 하지 말아주세요.
         
     이력 정보:  
     {context_text}
     """
 
     messages.append(HumanMessage(content=prompt))
-
-    response = get_llm().invoke(messages)
-
+    
+    tools = load_tools(tool_names=["arxiv", "wikipedia"], llm=get_llm())
+    agent = initialize_agent(
+        tools=tools, llm=get_llm(),
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    #    verbose=True
+    )
+    
+    response = agent.invoke(messages)
     new_state = state.copy()
-    new_state["messages"].append({"role": "interviewer", "content": response.content})
+    
+    new_state["messages"].append({"role": "interviewer", "content": response['output']})
     return new_state
+
 
 def feedback_agent(state: InterviewState) -> InterviewState:
     """

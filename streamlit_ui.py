@@ -46,6 +46,7 @@ def init_session(st):
         "is_summary": False,
         "user_input": ""
     }
+    st.session_state.graph_config = {"configurable": {"thread_id": "unique_session"}}
 
 
 def render_document_upload(st):
@@ -94,7 +95,9 @@ def render_ask(st, graph):
         st: The Streamlit module for UI rendering.
         graph: The workflow StateGraph instance managing the interview process.
     """
-    question_prompt = graph.invoke(st.session_state.graph_state, interrupt_after="ask")
+    graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
+    question_prompt = graph.invoke(None, interrupt_after="ask", config=st.session_state.graph_config)
+    st.session_state.graph_state = question_prompt
     question = question_prompt["messages"][-1]["content"]
     st.session_state.questions.append(question)
     st.session_state.messages.append(AIMessage(content=question))
@@ -130,7 +133,9 @@ def render_wait_answer(st, graph):
         st.session_state.answers.append(user_input)
         st.session_state.messages.append(HumanMessage(content=user_input))
         st.session_state.graph_state["user_input"] = user_input
-        response = graph.invoke(st.session_state.graph_state, interrupt_after="feedback")
+        graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
+        response = graph.invoke(None, interrupt_after="feedback", config=st.session_state.graph_config)
+        st.session_state.graph_state = response
         feedback = response['messages'][-1]['content']
         st.session_state.feedbacks.append(feedback)
         st.session_state.messages.append(AIMessage(content=feedback))
@@ -167,7 +172,8 @@ def render_summary(st, graph):
         graph: The workflow StateGraph instance managing the interview process.
     """
     with st.spinner("당신의 답변을 바탕으로 부족한 부분을 요약 중입니다..."):
-        response = graph.invoke(st.session_state.graph_state)
+        graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
+        response = graph.invoke(None, config=st.session_state.graph_config)
         summary = response['messages'][-1]['content']
         st.markdown("### 📋 면접 피드백 요약")
         st.markdown(summary)
