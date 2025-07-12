@@ -1,55 +1,42 @@
-from langchain.prompts import PromptTemplate
-from config.parameters import get_llm
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import SystemMessage, BaseMessage
 from rag.vector_store import load_faiss
+from config.parameters import get_llm
 
 llm = get_llm()
 
-question_prompt = PromptTemplate(
-    input_variables=["tech_list"],
-    template="""
-당신은 신입/주니어 백엔드 개발자를 위한 기술 면접관입니다.
 
-다음 기술 스택을 기반으로 하나의 면접 질문을 만들어주세요:
-{tech_list}
+def get_question_prompt(context: str, tech_keywords: list[str]) -> str:
+    return f"""
+당신은 기술 면접관입니다. 아래 이력 기반 정보와 대화 맥락을 참고해,  
+다음 기술({', '.join(tech_keywords)}) 관련 면접 질문을 하나만,  
+질문만, 설명 없이, 한 문장으로 생성하세요.
+    
+이력 정보:  
+{context}
 
-조건:
-- 너무 쉽지 않고, 개념을 확인할 수 있는 질문
-- 한 문장으로 명확하게
-- 오픈형 질문 (예/아니오가 아닌 설명을 요구)
-
-질문:
+이전 대화: 참고용
 """
-)
 
 
-def generate_question(tech_keywords: list[str]) -> str:
-    tech_list_str = "\n- " + "\n- ".join(tech_keywords)
-    prompt = question_prompt.format(tech_list=tech_list_str)
-    response = llm.invoke(prompt)
-    return response.content.strip()
-
-
-def generate_question_with_rag(tech_keywords: list[str]) -> str:
-    db = load_faiss()
-    context = ""
-
-    if db is not None:
+def generate_question_with_rag(tech_keywords: list[str], history: list[BaseMessage]) -> str:
+    try:
+        db = load_faiss()
         retriever = db.as_retriever(search_kwargs={"k": 3})
         context_docs = retriever.get_relevant_documents(" ".join(tech_keywords))
         context = "\n\n".join(doc.page_content for doc in context_docs)
+        context_text = f"""다음은 지원자의 이력 기반 정보입니다:\n{context}"""
+    except FileNotFoundError:
+        context_text = "지원자의 문서 기반 정보가 없습니다. 기술 키워드만 참고하세요."
 
-    prompt = f"""당신은 기술 면접관입니다.
+    system_prompt = get_question_prompt(context_text, tech_keywords)
 
-다음은 지원자의 이력 기반 정보입니다:
-{context if context else '[문서 없음]'}
+    prompt = ChatPromptTemplate.from_messages([
+        SystemMessage(content=system_prompt),
+        MessagesPlaceholder(variable_name="history"),
+        SystemMessage(content="위 정보를 바탕으로 다음 질문을 작성하세요.")
+    ])
 
-이 내용을 바탕으로 다음 기술({', '.join(tech_keywords)}) 관련 면접 질문을 하나 생성해주세요.
+    messages = prompt.format_messages(history=history)
 
-조건:
-- 설명형 질문
-- 한 문장
-- 너무 쉽지 않도록
-
-질문:"""
-
-    return llm.invoke(prompt).content.strip()
+    return llm.invoke(messages).content.strip()

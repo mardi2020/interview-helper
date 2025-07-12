@@ -1,6 +1,10 @@
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts import PromptTemplate
 
+from config.parameters import get_llm
+
+llm = get_llm()
+
 
 def get_feedback_prompt():
     examples = [
@@ -28,3 +32,11 @@ def get_feedback_prompt():
     )
 
     return prompt
+
+
+def get_feedback(user_input: str) -> str:
+    prompt = get_feedback_prompt()
+    formatted_prompt = prompt.format(user_answer=user_input)
+    response = llm.invoke(formatted_prompt)
+    feedback_text = response.content.strip() if hasattr(response, "content") else str(response)
+    return feedback_text
