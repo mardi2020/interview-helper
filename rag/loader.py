@@ -2,14 +2,32 @@
 Module for loading and splitting uploaded text or PDF files into smaller chunks
 using LangChain document loaders and text splitter.
 """
-
-from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import tempfile
 import os
 
+from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 def load_and_split_file(uploaded_file):
+    """
+    Load an uploaded text or PDF file, then split its content into smaller chunks.
+
+    The function:
+    - Saves the uploaded file temporarily
+    - Uses appropriate LangChain document loader based on file extension
+    - Splits the loaded document into chunks using RecursiveCharacterTextSplitter
+
+    Args:
+        uploaded_file: A file-like object uploaded via Streamlit or similar,
+                       with attributes like `.name` and `.read()` method.
+
+    Returns:
+        List of document chunks split by RecursiveCharacterTextSplitter.
+
+    Raises:
+        ValueError: If the uploaded file type is not supported (not pdf, txt, or md).
+    """
     suffix = os.path.splitext(uploaded_file.name)[-1].lower()
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
