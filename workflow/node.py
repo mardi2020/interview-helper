@@ -96,7 +96,10 @@ def feedback_agent(state: InterviewState) -> InterviewState:
         },
         {
             "answer": "RAG 챗봇에서 LangChain을 썼어요.",
-            "feedback": "LangChain 사용 언급은 좋지만, 어떤 모듈을 사용했는지, chunk 전략이나 retriever 방식에 대한 구체적인 설명이 필요합니다."
+            "feedback": (
+                "LangChain 사용 언급은 좋지만, 어떤 모듈을 사용했는지, "
+                 "chunk 전략이나 retriever 방식에 대한 구체적인 설명이 필요합니다."
+                )
         },
     ]
 
@@ -112,8 +115,10 @@ def feedback_agent(state: InterviewState) -> InterviewState:
         suffix="지원자: {user_answer}\n피드백:",
         input_variables=["user_answer"],
     )
+    messages.append(HumanMessage(content=fewshot_prompt.invoke(
+        {"user_answer": state["user_input"]}).to_string())
+        )
 
-    messages.append(HumanMessage(content=fewshot_prompt.invoke({"user_answer": state["user_input"]}).to_string()))
     response = get_llm().invoke(messages)
 
     new_state = state.copy()
