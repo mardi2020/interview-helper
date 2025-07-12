@@ -46,7 +46,6 @@ This is a chatbot that helps you prepare for technical interviews using document
 Please access the app by visiting http://localhost:8501 in your browser.
 
 You can use the Docker image via GitHub Packages at:
-
 https://github.com/mardi2020/interview-helper/pkgs/container/interview-helper
 
 - Please pull the image and use it as follows
