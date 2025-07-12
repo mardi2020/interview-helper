@@ -7,9 +7,11 @@ from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts import PromptTemplate
 
-from .state import InterviewState
 from config.parameters import get_llm
 from rag.vector_store import load_faiss
+
+from .state import InterviewState
+
 
 
 def ask_agent(state: InterviewState) -> InterviewState:
