@@ -1,11 +1,6 @@
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
 
-from prompt.feedback import get_feedback
-from prompt.summary import get_summary_prompt
-from prompt.question import generate_question_with_rag
 from config.parameters import get_llm
 from rag.loader import load_and_split_file
 from rag.vector_store import save_to_faiss
@@ -13,7 +8,6 @@ from rag.vector_store import save_to_faiss
 import streamlit as st
 
 from workflow.graph import create_graph
-from workflow.state import InterviewState
 
 llm = get_llm()
 graph = create_graph()
@@ -129,16 +123,6 @@ def render_ui(page_title="나의 면접관"):
     # 전체 요약
     elif st.session_state.stage == "summary":
         with st.spinner("당신의 답변을 바탕으로 부족한 부분을 요약 중입니다..."):
-            # qa_text = "\n\n".join(
-            #     f"Q: {q}\nA: {a}\nFeedback: {f}"
-            #     for q, a, f in zip(
-            #         st.session_state.questions,
-            #         st.session_state.answers,
-            #         st.session_state.feedbacks
-            #     )
-            # )
-            # summary_prompt = get_summary_prompt().format(qa_history=qa_text)
-            # summary = llm.invoke(summary_prompt).content
             response = graph.invoke(st.session_state.graph_state)
             summary = response['messages'][-1]['content']
             st.markdown("### 📋 면접 피드백 요약")
