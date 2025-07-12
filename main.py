@@ -88,7 +88,7 @@ def render_ui(page_title="나의 면접관"):
         question generation, feedback, and summarization based on the current state.
         It relies on Streamlit's rerun mechanism to refresh UI and state transitions.
     """
-    
+
     st.set_page_config(page_title=page_title)
     st.title(page_title)
 
@@ -145,7 +145,6 @@ def render_ui(page_title="나의 면접관"):
     if st.session_state.stage == "wait_answer":
         user_input = st.chat_input("질문에 답변해보세요.", key="user_input")
         if user_input:
-            history = st.session_state.memory
             st.session_state.answers.append(user_input)
             st.session_state.messages.append(HumanMessage(content=user_input))
             st.session_state.graph_state["user_input"] = user_input
