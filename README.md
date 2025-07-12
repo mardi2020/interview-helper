@@ -10,6 +10,7 @@ This is a chatbot that helps you prepare for technical interviews using document
 ### Installation
 
 #### Common requirements
+- Pull this repository
 - Create `.env` file in the root directory and fill it with the following content.
   ```
   OPENAI_API_KEY={your-api-key}
