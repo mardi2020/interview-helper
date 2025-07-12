@@ -4,10 +4,9 @@ Main entry point for the interview helper Streamlit app.
 Creates the interview workflow graph and passes it along with the Streamlit
 module to the UI renderer.
 """
-from streamlit_ui import render_ui
-
 import streamlit as st
 
+from streamlit_ui import render_ui
 from workflow.graph import create_graph
 
 

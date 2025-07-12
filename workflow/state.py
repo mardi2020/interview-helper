@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """
 Module defining constants and state types for managing the interview session workflow.
 
