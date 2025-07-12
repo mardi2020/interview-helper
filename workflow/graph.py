@@ -3,6 +3,7 @@ Module to create and compile the interview workflow graph
 using StateGraph with defined agents and conditional transitions.
 """
 
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, END, START
 
 from workflow.node import ask_agent, feedback_agent, summary_agent
@@ -28,6 +29,7 @@ def create_graph() -> StateGraph:
     Returns:
         Compiled StateGraph ready for execution.
     """
+    memory = MemorySaver()
     workflow = StateGraph(InterviewState)
 
     workflow.add_node("ask", ask_agent)
@@ -46,4 +48,13 @@ def create_graph() -> StateGraph:
     )
 
     workflow.add_edge("summary", END)
-    return workflow.compile()
+    return workflow.compile(
+        checkpointer=memory,
+    )
+
+
+graph = create_graph()
+
+
+def get_graph():
+    return graph

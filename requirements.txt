@@ -5,7 +5,9 @@ altair==5.5.0
 annotated-types==0.7.0
 anthropic==0.57.1
 anyio==4.9.0
+arxiv==2.2.0
 attrs==25.3.0
+beautifulsoup4==4.13.4
 blinker==1.9.0
 cachetools==6.1.0
 certifi==2025.7.9
@@ -21,6 +23,7 @@ frozenlist==1.7.0
 gitdb==4.0.12
 GitPython==3.1.44
 googleapis-common-protos==1.70.0
+greenlet==3.2.3
 grpcio==1.73.1
 h11==0.16.0
 httpcore==1.0.9
@@ -47,6 +50,7 @@ langgraph-checkpoint==2.1.0
 langgraph-prebuilt==0.5.2
 langgraph-sdk==0.1.72
 langsmith==0.4.5
+lxml==6.0.0
 lz4==4.4.4
 MarkupSafe==3.0.2
 marshmallow==3.26.1
@@ -67,6 +71,7 @@ pillow==11.3.0
 pinecone-client==6.0.0
 pinecone-plugin-interface==0.0.7
 pinecone-text==0.10.0
+primp==0.15.0
 propcache==0.3.2
 protobuf==5.29.5
 protoc-gen-openapiv2==0.0.1
@@ -90,6 +95,7 @@ sgmllib3k==1.0.0
 six==1.17.0
 smmap==5.0.2
 sniffio==1.3.1
+soupsieve==2.7
 SQLAlchemy==2.0.41
 streamlit==1.46.1
 tavily-python==0.7.9
@@ -105,6 +111,8 @@ typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
 utils==1.0.2
+watchdog==6.0.0
+wikipedia==1.4.0
 xxhash==3.5.0
 yarl==1.20.1
 zstandard==0.23.0
