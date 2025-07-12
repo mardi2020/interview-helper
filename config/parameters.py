@@ -25,7 +25,7 @@ def get_llm():
     """
     return ChatOpenAI(
         model=MODEL,
-        temperature=0
+        temperature=0.2
     )
 
 
