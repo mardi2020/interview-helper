@@ -95,8 +95,7 @@ def render_ask(st, graph):
         st: The Streamlit module for UI rendering.
         graph: The workflow StateGraph instance managing the interview process.
     """
-    graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
-    question_prompt = graph.invoke(None,
+    question_prompt = graph.invoke(st.session_state.graph_state,
                                    interrupt_after="ask",
                                    config=st.session_state.graph_config)
     st.session_state.graph_state = question_prompt
