@@ -202,11 +202,6 @@ def render_ui(st, graph, page_title="나의 면접관"):
 
     render_document_upload(st)
 
-    if st.button("🧹 대화 초기화"):
-        st.session_state.clear()
-        init_session(st)
-        st.rerun()
-
     stage = st.session_state.stage
 
     if stage == "select_topic":
