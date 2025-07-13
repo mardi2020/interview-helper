@@ -96,7 +96,9 @@ def render_ask(st, graph):
         graph: The workflow StateGraph instance managing the interview process.
     """
     graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
-    question_prompt = graph.invoke(None, interrupt_after="ask", config=st.session_state.graph_config)
+    question_prompt = graph.invoke(None,
+                                   interrupt_after="ask",
+                                   config=st.session_state.graph_config)
     st.session_state.graph_state = question_prompt
     question = question_prompt["messages"][-1]["content"]
     st.session_state.questions.append(question)
@@ -133,8 +135,10 @@ def render_wait_answer(st, graph):
         st.session_state.answers.append(user_input)
         st.session_state.messages.append(HumanMessage(content=user_input))
         st.session_state.graph_state["user_input"] = user_input
-        graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
-        response = graph.invoke(None, interrupt_after="feedback", config=st.session_state.graph_config)
+        graph.update_state(values=st.session_state.graph_state,
+                           config=st.session_state.graph_config)
+        response = graph.invoke(None, interrupt_after="feedback",
+                                config=st.session_state.graph_config)
         st.session_state.graph_state = response
         feedback = response['messages'][-1]['content']
         st.session_state.feedbacks.append(feedback)
@@ -172,7 +176,8 @@ def render_summary(st, graph):
         graph: The workflow StateGraph instance managing the interview process.
     """
     with st.spinner("당신의 답변을 바탕으로 부족한 부분을 요약 중입니다..."):
-        graph.update_state(values=st.session_state.graph_state, config=st.session_state.graph_config)
+        graph.update_state(values=st.session_state.graph_state,
+                           config=st.session_state.graph_config)
         response = graph.invoke(None, config=st.session_state.graph_config)
         summary = response['messages'][-1]['content']
         st.markdown("### 📋 면접 피드백 요약")

@@ -32,7 +32,7 @@ def ask_agent(state: InterviewState) -> InterviewState:
     """
 
     messages = [SystemMessage(content=system_prompt)]
-        # state에서 메시지 가져오기
+
     for message in state["messages"]:
         if message["role"] == "assistant":
             messages.append(AIMessage(content=message["content"]))
@@ -61,17 +61,17 @@ def ask_agent(state: InterviewState) -> InterviewState:
     """
 
     messages.append(HumanMessage(content=prompt))
-    
+
     tools = load_tools(tool_names=["arxiv", "wikipedia"], llm=get_llm())
     agent = initialize_agent(
         tools=tools, llm=get_llm(),
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     #    verbose=True
     )
-    
+
     response = agent.invoke(messages)
     new_state = state.copy()
-    
+
     new_state["messages"].append({"role": "interviewer", "content": response['output']})
     return new_state
 
