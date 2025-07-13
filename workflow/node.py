@@ -88,7 +88,7 @@ def feedback_agent(state: InterviewState) -> InterviewState:
     """
 
     system_prompt = """
-    당신은 전문적인 기술 면접관이자 강사사입니다.
+    당신은 전문적인 기술 면접관이자 강사입니다.
     취업준비생들에게 조언을 해주기 위해 질문/답변들을 토대로 조언을 해줍니다.
     """
     messages = [SystemMessage(content=system_prompt)]
