@@ -57,4 +57,5 @@ graph = create_graph()
 
 
 def get_graph():
+    """Retrieve the compiled interview workflow graph."""
     return graph
