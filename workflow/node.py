@@ -70,7 +70,6 @@ def ask_agent(state: InterviewState) -> InterviewState:
             agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
             max_iterations=3,
             max_execution_time=10,
-            early_stopping_method="generate",
             verbose=False
         )
         response = agent.invoke(messages)
