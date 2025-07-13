@@ -62,17 +62,30 @@ def ask_agent(state: InterviewState) -> InterviewState:
 
     messages.append(HumanMessage(content=prompt))
 
-    tools = load_tools(tool_names=["arxiv", "wikipedia"], llm=get_llm())
-    agent = initialize_agent(
-        tools=tools, llm=get_llm(),
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    #    verbose=True
-    )
+    try:
+        tools = load_tools(tool_names=["arxiv", "wikipedia"], llm=get_llm())
+        agent = initialize_agent(
+            tools=tools, 
+            llm=get_llm(),
+            agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+            max_iterations=3,
+            max_execution_time=10,
+            early_stopping_method="generate",
+            verbose=False
+        )
+        response = agent.invoke(messages)
+        output = response['output']
+        if "Agent stopped due to iteration limit or time limit" in response['output']:
+            output = 'ERROR'
+    except (ConnectionError, RuntimeError):
+        output = 'ERROR'
 
-    response = agent.invoke(messages)
+    if output == 'ERROR':
+        response = get_llm().invoke(messages)
+        output = response.content
+
     new_state = state.copy()
-
-    new_state["messages"].append({"role": "interviewer", "content": response['output']})
+    new_state["messages"].append({"role": "interviewer", "content": output})
     return new_state
 
 
